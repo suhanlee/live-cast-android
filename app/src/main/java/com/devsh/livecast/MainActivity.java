@@ -3,7 +3,9 @@ package com.devsh.livecast;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,9 +15,29 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.devsh.livecast.common.Common;
+import com.devsh.livecast.common.ServiceGenerator;
+import com.devsh.livecast.common.SharedData;
+import com.devsh.livecast.feed.FeedRecyclerAdapter;
+import com.devsh.livecast.feed.model.Feed;
+import com.devsh.livecast.feed.model.FeedItem;
+import com.devsh.livecast.feed.service.FeedService;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private SwipeRefreshLayout mSwipeLayout;
+    private FeedService mService;
+    private RecyclerView mRecyclerView;
+    private int ROW_NUMBER_COUNT = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +50,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-                Intent intent = new Intent(MainActivity.this, LivePlayer.class);
+                Intent intent = new Intent(MainActivity.this, CreateLiveStreamActivity.class);
                 startActivity(intent);
             }
         });
@@ -44,6 +63,44 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        initializeRecyclerView();
+    }
+
+    private void initializeRecyclerView() {
+        mService = ServiceGenerator.createService(Common.SERVER_URL, FeedService.class);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, ROW_NUMBER_COUNT));
+        mRecyclerView.setHasFixedSize(true);
+
+        mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        mSwipeLayout.setOnRefreshListener(() -> updateFromServer() );
+
+        updateFromServer();
+    }
+
+    private void updateFromServer() {
+        Call<Feed> call = mService.getFeeds(SharedData.getServerToken(this));
+        call.enqueue(new Callback<Feed>() {
+            @Override
+            public void onResponse(Call<Feed> call, Response<Feed> response) {
+                if (response.isSuccessful()) {
+                    Feed feed = response.body();
+                    List<FeedItem> items = feed.getFeed_list();
+
+                    FeedRecyclerAdapter feedServerAdapter = new FeedRecyclerAdapter(MainActivity.this, items);
+                    mRecyclerView.setAdapter(feedServerAdapter);
+                    mSwipeLayout.setRefreshing(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Feed> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Failure to get feed list", Toast.LENGTH_LONG).show();
+                mSwipeLayout.setRefreshing(false);
+            }
+        });
     }
 
     @Override

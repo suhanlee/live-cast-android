@@ -90,7 +90,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/ic_settings"
             android:src="@drawable/ic_settings"
-            android:onClick="onSettings"
             android:background="#000000ff"
             android:padding="10dp"
             android:layout_alignParentEnd="true"

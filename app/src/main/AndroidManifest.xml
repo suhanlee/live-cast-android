@@ -48,7 +48,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/camera_example_title"
             android:logo="@mipmap/ic_launcher"
-            android:screenOrientation="fullSensor"></activity>
+            android:screenOrientation="fullSensor" />
         <activity android:name=".LiveActivity" />
         <activity
             android:name=".config.ConfigPrefsActivity"
@@ -56,7 +56,8 @@
             android:label="@string/configuration_settings_title"
             android:screenOrientation="fullSensor"
             android:theme="@style/ConfigTheme" />
-        <activity android:name=".LivePlayer"></activity>
+        <activity android:name=".LivePlayer" />
+        <activity android:name=".CreateLiveStreamActivity"></activity>
     </application>
 
 </manifest>
