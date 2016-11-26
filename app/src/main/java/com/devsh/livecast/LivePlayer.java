@@ -2,9 +2,8 @@ package com.devsh.livecast;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Toast;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.VideoView;
 
 public class LivePlayer extends AppCompatActivity {
@@ -22,7 +21,7 @@ public class LivePlayer extends AppCompatActivity {
         Intent intent = getIntent();
         String movieUrl = intent.getExtras().getString("movie_url");
 
-        Toast.makeText(getApplicationContext(), "url:" + movieUrl, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "url:" + movieUrl, Toast.LENGTH_SHORT).show();
         if (movieUrl != null) {
             VideoView videoView = (VideoView) findViewById(R.id.video_view);
             videoView.setVideoURI(Uri.parse(movieUrl));

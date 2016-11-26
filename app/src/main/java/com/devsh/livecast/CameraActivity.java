@@ -16,15 +16,25 @@
 package com.devsh.livecast;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.devsh.livecast.common.SharedData;
+import com.devsh.livecast.live.LiveResponse;
+import com.devsh.livecast.live.LiveServiceController;
 import com.devsh.livecast.ui.AutoFocusListener;
 import com.devsh.livecast.ui.MultiStateButton;
 import com.devsh.livecast.ui.TimerView;
 import com.wowza.gocoder.sdk.api.devices.WZCamera;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class CameraActivity extends CameraActivityBase {
     private final static String TAG = CameraActivity.class.getSimpleName();
@@ -69,6 +79,41 @@ public class CameraActivity extends CameraActivityBase {
                 activeCamera.setFocusMode(WZCamera.FOCUS_MODE_CONTINUOUS);
         }
 
+    }
+
+    private void deleteApplication() {
+        String appName = SharedData.getLiveApplicationName(getApplicationContext());
+        if (!TextUtils.isEmpty(appName)) {
+            Observable<LiveResponse> liveResponse = LiveServiceController.deleteLive(getApplicationContext(), appName);
+            liveResponse.subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe( body-> {
+                        SharedData.putLiveApplicationName(getApplicationContext(), null);
+                        finish();
+                    }, erros -> {
+                        finish();
+                    });
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setMessage("정말 종료하시겠습니까?");
+        d.setPositiveButton("예", new DialogInterface.OnClickListener() {
+
+
+            public void onClick(DialogInterface dialog, int which) {
+                // process전체 종료
+                deleteApplication();
+            }
+        });
+        d.setNegativeButton("아니요", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        d.show();
     }
 
     @Override

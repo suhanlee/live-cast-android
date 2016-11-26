@@ -50,6 +50,10 @@ public class SharedData extends ASharedData {
         putSharedPreferenceString(context, LIVE_APPLICATION_NAME_KEY, applicationName);
     }
 
+    public static String getLiveApplicationName(Context context) {
+        return getSharedPreferenceString(context, LIVE_APPLICATION_NAME_KEY);
+    }
+
     public static void putLiveUserName(Context context, String liveUserName) {
         putSharedPreferenceString(context, LIVE_USER_NAME_KEY, liveUserName);
     }

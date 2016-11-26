@@ -14,4 +14,11 @@ public class LiveServiceController {
         Observable<LiveResponse> response = service.createLive(roomName);
         return response;
     }
+
+    public static Observable<LiveResponse> deleteLive(Context context, String appName) {
+        LiveService service = ServiceGenerator.createService(Common.SERVER_URL, LiveService.class);
+        Observable<LiveResponse> response = service.deleteLive(appName);
+
+        return response;
+    }
 }
